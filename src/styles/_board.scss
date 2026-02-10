@@ -1,0 +1,43 @@
+// src/styles/_board.scss
+@import "./variables";
+
+.board {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+
+  h1 {
+    font-size: 1.8rem;
+    color: $color-accent;
+    margin-bottom: 1rem;
+  }
+
+  button {
+    background: $color-accent;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .list {
+    background: $color-surface;
+    padding: 1rem;
+    border-radius: 8px;
+    width: 250px;
+    flex-shrink: 0;
+
+    h3 {
+      margin: 0 0 0.5rem;
+    }
+
+    .card {
+      background: darken($color-surface, 5%);
+      margin-bottom: 0.5rem;
+      padding: 0.5rem;
+      border-radius: 6px;
+      cursor: grab;
+    }
+  }
+}

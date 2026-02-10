@@ -1,0 +1,18 @@
+// src/styles/globals.scss
+@import "./variables";
+@import "./board";
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background-color: $color-bg;
+  color: $color-text;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+}
