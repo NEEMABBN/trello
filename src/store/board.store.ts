@@ -16,10 +16,13 @@ interface BoardState {
 
   addCard: (listId: string, title: string) => void;
   moveCard: (cardId: string, toListId: string, toIndex: number) => void;
+
+  removeCard: (cardId: string) => void;
+  toggleCardDone: (cardId: string) => void;
 }
 
 const initialSnap: Snapshot = loadSnapshot() ?? {
-  board: { id: "1", title: "Demo Board", listIds: [] },
+  board: { id: "1", title: "Task Board", listIds: [] },
   lists: {},
   cards: {},
   version: 1,
@@ -66,9 +69,7 @@ export const useBoard = create<BoardState>((set, get) => ({
     const snap = structuredClone(get().snap);
     const id = crypto.randomUUID();
 
-    snap.cards[id] = { id, title, listId, comments: [] };
-    // snap.cards[id] = { id, title, listId } as any;
-
+    snap.cards[id] = { id, title, listId, comments: [], done: false };
     snap.lists[listId].cardIds.push(id);
 
     get().setSnap(snap);
@@ -89,6 +90,33 @@ export const useBoard = create<BoardState>((set, get) => ({
     toList.cardIds.splice(toIndex, 0, cardId);
 
     card.listId = toListId;
+
+    get().setSnap(snap);
+  },
+
+  removeCard: (cardId) => {
+    const snap = structuredClone(get().snap);
+
+    const card = snap.cards[cardId];
+    if (!card) return;
+
+    const list = snap.lists[card.listId];
+    if (list) {
+      list.cardIds = list.cardIds.filter((id) => id !== cardId);
+    }
+
+    delete snap.cards[cardId];
+
+    get().setSnap(snap);
+  },
+
+  toggleCardDone: (cardId) => {
+    const snap = structuredClone(get().snap);
+
+    const card = snap.cards[cardId];
+    if (!card) return;
+
+    card.done = !card.done;
 
     get().setSnap(snap);
   },

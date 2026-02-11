@@ -1,5 +1,19 @@
-// src/styles/_variables.scss
-$color-bg: #0f172a;
-$color-text: #f1f5f9;
-$color-surface: #1e293b;
-$color-accent: #6366f1;
+$color-text: #e7fff6;
+$color-muted: rgba(231, 255, 246, 0.72);
+$color-accent: #2dd4bf;
+$color-accent-2: #22c55e;
+
+$glass-bg: rgba(15, 23, 42, 0.42);
+$glass-bg-2: rgba(2, 44, 34, 0.28);
+$glass-border: 1px solid rgba(45, 212, 191, 0.18);
+
+// Radius / shadows
+$radius-lg: 16px;
+$radius-md: 12px;
+
+$shadow-soft: 0 22px 70px rgba(0, 0, 0, 0.35);
+$shadow-glass: 0 18px 50px rgba(0, 0, 0, 0.28);
+
+// Backdrop blur strength
+$blur-md: 14px;
+$blur-lg: 18px;

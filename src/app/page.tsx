@@ -36,14 +36,12 @@ const cardIdFrom = (prefixed: string) => prefixed.slice(5);
 export default function Home() {
   const { snap, setSnap, setBoardTitle, addList, moveCard } = useBoard();
 
-  // ✅ SSR-safe hydration flag (no localStorage mismatch during hydration)
   const hydrated = useSyncExternalStore(
     () => () => {}, // subscribe (no-op)
     () => true, // client snapshot
     () => false, // server snapshot
   );
 
-  // --- UI: add list ---
   const [isAddingList, setIsAddingList] = useState(false);
   const [newListTitle, setNewListTitle] = useState("");
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -52,11 +50,11 @@ export default function Home() {
     if (isAddingList) inputRef.current?.focus();
   }, [isAddingList]);
 
-  // --- DnD sensors ---
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
   );
 
+  // lists sortable ids (prefixed)
   const listSortableIds = useMemo(
     () => snap.board.listIds.map((id) => `list:${id}`),
     [snap.board.listIds],
@@ -101,7 +99,6 @@ export default function Home() {
     const oId = event.over ? asString(event.over.id) : null;
     if (!oId) return;
 
-    // --- LIST REORDER ---
     if (isList(aId) && isList(oId)) {
       const fromListId = listIdFrom(aId);
       const toListId = listIdFrom(oId);
@@ -117,7 +114,6 @@ export default function Home() {
       return;
     }
 
-    // --- CARD MOVE / REORDER ---
     if (isCard(aId)) {
       const draggedCardId = cardIdFrom(aId);
       const dragged = snap.cards[draggedCardId];
@@ -160,118 +156,117 @@ export default function Home() {
     }
   };
 
-  // ✅ IMPORTANT: Don't render snap-based UI until hydrated.
-  // This avoids server(default) vs client(localStorage) mismatches.
   if (!hydrated) {
     return (
-      <main style={{ padding: "1rem", minHeight: "100vh" }}>
-        <div style={{ color: "#94a3b8" }}>Loading board…</div>
+      <main className="page">
+        <div className="board-shell">
+          <div style={{ color: "#94a3b8" }}>Loading board…</div>
+        </div>
       </main>
     );
   }
 
   return (
-    <main style={{ padding: "1rem", minHeight: "100vh" }}>
-      <InlineTitle
-        value={snap.board.title}
-        onChange={setBoardTitle}
-        fontSize="1.6rem"
-        bold
-      />
+    <main className="page">
+      <div className="board-shell">
+        <div className="board-title">
+          <InlineTitle
+            value={snap.board.title}
+            onChange={setBoardTitle}
+            fontSize="1.6rem"
+            bold
+          />
+        </div>
 
-      <div style={{ marginTop: "1rem", marginBottom: "1.5rem" }}>
-        {isAddingList ? (
-          <div style={{ display: "flex", gap: "0.5rem" }}>
-            <input
-              ref={inputRef}
-              value={newListTitle}
-              onChange={(e) => setNewListTitle(e.target.value)}
-              placeholder="Enter list title..."
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
+        {/* Add List */}
+        <div className="add-list">
+          {isAddingList ? (
+            <div style={{ display: "flex", gap: "0.5rem" }}>
+              <input
+                ref={inputRef}
+                value={newListTitle}
+                onChange={(e) => setNewListTitle(e.target.value)}
+                placeholder="Enter list title..."
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    const t = newListTitle.trim();
+                    if (!t) return;
+                    addList(t);
+                    setNewListTitle("");
+                    setIsAddingList(false);
+                  }
+                  if (e.key === "Escape") {
+                    setIsAddingList(false);
+                    setNewListTitle("");
+                  }
+                }}
+                style={{
+                  padding: "0.6rem",
+                  borderRadius: "6px",
+                  border: "1px solid #334155",
+                  background: "#1e293b",
+                  color: "#f1f5f9",
+                  flex: 1,
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => {
                   const t = newListTitle.trim();
                   if (!t) return;
                   addList(t);
                   setNewListTitle("");
                   setIsAddingList(false);
-                }
-                if (e.key === "Escape") {
-                  setIsAddingList(false);
-                  setNewListTitle("");
-                }
-              }}
-              style={{
-                padding: "0.6rem",
-                borderRadius: "6px",
-                border: "1px solid #334155",
-                background: "#1e293b",
-                color: "#f1f5f9",
-                flex: 1,
-              }}
-            />
+                }}
+                style={{
+                  background: "#6366f1",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "6px",
+                  padding: "0.4rem 0.8rem",
+                  cursor: "pointer",
+                }}
+              >
+                ✓
+              </button>
+            </div>
+          ) : (
             <button
               type="button"
-              onClick={() => {
-                const t = newListTitle.trim();
-                if (!t) return;
-                addList(t);
-                setNewListTitle("");
-                setIsAddingList(false);
-              }}
+              onClick={() => setIsAddingList(true)}
               style={{
-                background: "#6366f1",
-                color: "#fff",
-                border: "none",
+                background: "transparent",
+                color: "#94a3b8",
+                border: "1px dashed #475569",
                 borderRadius: "6px",
-                padding: "0.4rem 0.8rem",
+                padding: "0.5rem 1rem",
                 cursor: "pointer",
               }}
             >
-              ✓
+              + Add List
             </button>
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={() => setIsAddingList(true)}
-            style={{
-              background: "transparent",
-              color: "#94a3b8",
-              border: "1px dashed #475569",
-              borderRadius: "6px",
-              padding: "0.5rem 1rem",
-              cursor: "pointer",
-            }}
-          >
-            + Add List
-          </button>
-        )}
-      </div>
+          )}
+        </div>
 
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCorners}
-        onDragOver={onDragOver}
-        onDragEnd={onDragEnd}
-      >
-        <SortableContext
-          items={listSortableIds}
-          strategy={horizontalListSortingStrategy}
+        {/* Board */}
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCorners}
+          onDragOver={onDragOver}
+          onDragEnd={onDragEnd}
         >
-          <div
-            style={{
-              display: "flex",
-              gap: "1rem",
-              overflowX: "auto",
-              paddingBottom: "1rem",
-            }}
+          <SortableContext
+            items={listSortableIds}
+            strategy={horizontalListSortingStrategy}
           >
-            {snap.board.listIds.map((listId) => (
-              <ListContainer key={listId} id={listId} />
-            ))}
-          </div>
-        </SortableContext>
-      </DndContext>
+            <div className="lists-row">
+              {snap.board.listIds.map((listId) => (
+                <ListContainer key={listId} id={listId} />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
+      </div>
     </main>
   );
 }

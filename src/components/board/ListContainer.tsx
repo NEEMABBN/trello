@@ -5,7 +5,6 @@ import { CSS } from "@dnd-kit/utilities";
 import List from "@/components/board/List";
 
 export default function ListContainer({ id }: { id: string }) {
-  // IMPORTANT: we use a prefixed id to avoid collisions with card ids
   const sortableId = `list:${id}`;
 
   const {
@@ -20,13 +19,12 @@ export default function ListContainer({ id }: { id: string }) {
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.9 : 1,
+    opacity: isDragging ? 0.92 : 1,
     flexShrink: 0,
   };
 
   return (
-    <div ref={setNodeRef} style={style}>
-      {/* Make the header draggable by passing handle props */}
+    <div ref={setNodeRef} style={style} className="list-wrap">
       <List
         id={id}
         dragHandleProps={{

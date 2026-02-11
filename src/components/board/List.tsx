@@ -1,5 +1,3 @@
-// src/components/board/List.tsx
-
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -30,9 +28,8 @@ export default function List({
   const [isAdding, setIsAdding] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  // Droppable area for cards in this list (so you can drop into empty list too)
   const { setNodeRef: setDroppableRef } = useDroppable({
-    id: `list:${id}`, // IMPORTANT: same prefix used in page.tsx logic
+    id: `list:${id}`,
   });
 
   useEffect(() => {
@@ -55,70 +52,28 @@ export default function List({
     setIsAdding(false);
   };
 
-  // IMPORTANT: prefixed card ids for SortableContext
   const cardSortableIds = list.cardIds.map((cardId) => `card:${cardId}`);
 
   return (
-    <div
-      style={{
-        background: "#1e293b",
-        padding: "1rem",
-        borderRadius: "8px",
-        minWidth: "260px",
-        color: "#f1f5f9",
-        display: "flex",
-        flexDirection: "column",
-        gap: "0.5rem",
-      }}
-    >
-      {/* Header (drag handle lives here) */}
-      <div
-        {...(dragHandleProps ?? {})}
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          cursor: dragHandleProps ? "grab" : "default",
-          marginBottom: "0.25rem",
-          gap: "0.5rem",
-          userSelect: "none",
-        }}
-      >
-        <div style={{ flex: 1, minWidth: 0 }}>
+    <div className="list glass">
+      {/* Header */}
+      <div className="list__header" {...(dragHandleProps ?? {})}>
+        <div className="list__title">
           <InlineTitle value={list.title} onChange={handleTitleChange} bold />
         </div>
 
         <button
           type="button"
           onClick={() => removeList(list.id)}
-          style={{
-            background: "transparent",
-            border: "none",
-            color: "#f87171",
-            cursor: "pointer",
-            padding: "0.2rem",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-          }}
+          className="icon-btn icon-btn--danger"
           title="Delete list"
         >
           <Trash2 size={16} />
         </button>
       </div>
 
-      {/* Cards container (droppable + sortable) */}
-      <div
-        ref={setDroppableRef}
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "0.5rem",
-          minHeight: "24px",
-          marginBottom: "0.5rem",
-        }}
-      >
+      {/* Cards */}
+      <div ref={setDroppableRef} className="list__cards">
         <SortableContext
           items={cardSortableIds}
           strategy={verticalListSortingStrategy}
@@ -130,80 +85,48 @@ export default function List({
       </div>
 
       {/* Add card */}
-      {isAdding ? (
-        <div
-          style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}
-        >
-          <input
-            ref={inputRef}
-            value={newTitle}
-            onChange={(e) => setNewTitle(e.target.value)}
-            placeholder="Enter card title..."
-            onKeyDown={(e) => {
-              if (e.key === "Enter") handleAddCard();
-              if (e.key === "Escape") setIsAdding(false);
-            }}
-            style={{
-              width: "100%",
-              boxSizing: "border-box",
-              padding: "0.5rem",
-              borderRadius: "6px",
-              border: "1px solid #334155",
-              background: "#0f172a",
-              color: "#f1f5f9",
-              fontSize: "0.9rem",
-            }}
-          />
+      <div className="list__footer">
+        {isAdding ? (
+          <div className="add-card">
+            <input
+              ref={inputRef}
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+              placeholder="Enter card title..."
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleAddCard();
+                if (e.key === "Escape") setIsAdding(false);
+              }}
+              className="text-input"
+            />
 
-          <div style={{ display: "flex", gap: "0.5rem" }}>
-            <button
-              type="button"
-              onClick={handleAddCard}
-              style={{
-                background: "#6366f1",
-                color: "#fff",
-                border: "none",
-                borderRadius: "6px",
-                padding: "0.4rem 0.8rem",
-                cursor: "pointer",
-                flex: 1,
-              }}
-            >
-              Add
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsAdding(false)}
-              style={{
-                background: "transparent",
-                border: "1px solid #475569",
-                borderRadius: "6px",
-                padding: "0.4rem 0.8rem",
-                color: "#94a3b8",
-                cursor: "pointer",
-              }}
-            >
-              Cancel
-            </button>
+            <div className="add-card__actions">
+              <button
+                type="button"
+                onClick={handleAddCard}
+                className="btn btn--primary"
+              >
+                Add
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsAdding(false)}
+                className="btn btn--ghost"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
-        </div>
-      ) : (
-        <button
-          type="button"
-          onClick={() => setIsAdding(true)}
-          style={{
-            background: "transparent",
-            color: "#94a3b8",
-            border: "1px dashed #475569",
-            borderRadius: "6px",
-            padding: "0.5rem",
-            cursor: "pointer",
-            width: "100%",
-          }}
-        >
-          + Add Card
-        </button>
-      )}
+        ) : (
+          <button
+            type="button"
+            onClick={() => setIsAdding(true)}
+            className="btn btn--dashed"
+          >
+            + Add Card
+          </button>
+        )}
+      </div>
     </div>
   );
 }

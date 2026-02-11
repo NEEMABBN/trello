@@ -9,6 +9,7 @@ export interface Card {
   title: string;
   listId: string;
   comments: CardComment[];
+  done?: boolean;
 }
 
 export interface List {
